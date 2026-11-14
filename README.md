@@ -2,6 +2,10 @@
 
 Een kleine, privé lootjessite voor Sinterklaas in volle Sinterklaasstijl, voor je familie of vriendengroep.
 
+![De Sint rijdt over de daken boven de aftelklok](docs/toneel.png)
+
+**In het kort:** fork deze repo → importeer hem in Vercel → koppel een private Blob store → zet je Resend-key erin → vul namen in op de beheerpagina. Klaar.
+
 - **Persoonlijke links**: geen accounts of wachtwoorden; iedereen krijgt een geheime link per mail.
 - **Verlanglijstjes** met per wens een link en een notitie, plus een algemene notitie.
 - **Automatische trekking** zodra iedereen zijn lijstje klaar heeft. Niemand trekt zichzelf.
@@ -9,7 +13,8 @@ Een kleine, privé lootjessite voor Sinterklaas in volle Sinterklaasstijl, voor 
 - **Alleen jouw Sint ziet jouw lijstje**: je verlanglijstje is alleen zichtbaar voor degene die jou getrokken heeft.
 - **Mails** via [Resend](https://resend.com): uitnodiging, herinnering, en "je lootje is getrokken".
 - **Gedichtenhulp**: vul een paar woorden in en de Sint rijmt een gedicht.
-- Aftelklok, vallende pepernoten, een envelop met lakzegel en confetti bij het openen.
+- **WhatsApp**: de beheerpagina kopieert per deelnemer een berichtje met de persoonlijke link.
+- Een nachthemel met de Sint te paard over de daken, aftelklok, vallende pepernoten, een envelop met lakzegel en confetti bij het openen.
 
 Geen framework, geen build-stap: statische HTML/CSS/JS in `public/` en drie kleine serverless functies in `api/`. Opslag is één privé JSON-bestand in Vercel Blob.
 
@@ -24,6 +29,37 @@ Geen framework, geen build-stap: statische HTML/CSS/JS in `public/` en drie klei
 7. Open `https://<jouw-site>.vercel.app/beheer?k=<ADMIN_KEY>`, vul namen en mailadressen in en klik *Stuur uitnodiging naar iedereen*.
 
 Daarna gaat alles vanzelf: iedereen vult zijn lijstje in, de laatste die op *Mijn lijstje is klaar* klikt start de trekking, en iedereen krijgt een mail.
+
+## Je AI koppelen aan Vercel en Resend (MCP)
+
+Met MCP kan je AI-assistent zelf in je Vercel- en Resend-account kijken: deployments en logs lezen, opnieuw deployen, je verzenddomein controleren. Dat scheelt heen-en-weer kopiëren. Het is optioneel; alles kan ook met de hand via de stappen hierboven.
+
+**Claude (claude.ai, desktop of mobiel):** ga naar *Instellingen → Connectors*, voeg **Vercel** en **Resend** toe en log bij allebei in.
+
+**Claude Code:**
+
+```bash
+claude mcp add --transport http vercel https://mcp.vercel.com
+claude plugin install resend@claude-plugins-official
+# daarna in Claude Code: /mcp  (om in te loggen)
+```
+
+**Andere assistenten (Cursor, VS Code met Copilot, Codex, …):** voeg deze twee servers toe als remote MCP-server en log in via de browser.
+
+| Dienst | MCP-adres | Documentatie |
+| --- | --- | --- |
+| Vercel | `https://mcp.vercel.com` | [vercel.com/docs/agent-resources/vercel-mcp](https://vercel.com/docs/agent-resources/vercel-mcp) |
+| Resend | `https://mcp.resend.com/mcp` | [resend.com/docs/mcp-server](https://resend.com/docs/mcp-server) |
+
+Daarna kun je bijvoorbeeld vragen:
+
+- "Kijk in Vercel of de laatste deploy van mijn lootjessite gelukt is en of de opslag werkt."
+- "Controleer in Resend welk domein geverifieerd is en welk afzenderadres ik kan gebruiken."
+- "Deploy de site opnieuw en lees de foutlogs als het misgaat."
+
+**Wat bij ons wel en niet lukte via MCP** (kan per account en rechten verschillen): deployments bekijken, opnieuw deployen, de live site ophalen en het Resend-domein controleren ging prima. Een project aanmaken, environment variables zetten en een Blob store aanmaken werd geweigerd; dat zijn stap 2, 3 en 5 hierboven en die doe je in een paar klikken zelf in het Vercel-dashboard.
+
+Zet je Resend API-key en je `ADMIN_KEY` alleen in Vercel, nooit in de code of in een openbare chat.
 
 ## Lokaal draaien
 
