@@ -52,6 +52,7 @@ export default async function handler(req, res) {
     }
     return res.status(400).json({ error: 'Onbekende actie' });
   } catch (e) {
+    if (!e.status) console.error(e);
     return res.status(e.status || 500).json({ error: e.status ? e.message : 'Er ging iets mis: ' + String(e.message).slice(0, 200) });
   }
 }

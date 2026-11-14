@@ -1,4 +1,4 @@
-import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
+import { get, head, put, BlobNotFoundError, BlobPreconditionFailedError } from '@vercel/blob';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
 // Without a Blob token (local development) state lives in .data/state.json.
@@ -15,9 +15,15 @@ export async function load() {
     try { return { state: JSON.parse(await readFile(LOCAL_FILE, 'utf8')), etag: null }; }
     catch { return { state: empty(), etag: null }; }
   }
+  // The etag must come from head(): get() reports the CDN response header, which can differ
+  // (e.g. a weak etag once the file is large enough to be compressed) and then every write fails.
+  // head() runs first, so a write in between only makes our put fail and retry, never overwrite.
+  let etag;
+  try { etag = (await head(PATH)).etag; }
+  catch (e) { if (e instanceof BlobNotFoundError) return { state: empty(), etag: null }; throw e; }
   const r = await get(PATH, { access: 'private', useCache: false });
   if (!r) return { state: empty(), etag: null };
-  return { state: JSON.parse(await new Response(r.stream).text()), etag: r.blob.etag };
+  return { state: JSON.parse(await new Response(r.stream).text()), etag };
 }
 
 // Read-modify-write with optimistic locking, so two people saving at once don't overwrite each other.

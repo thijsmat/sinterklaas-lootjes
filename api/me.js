@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     if (justDrawn) result.mails = (await sendMany('drawn', justDrawn, siteUrl(req))).map(({ ok }) => ok);
     return res.json(result);
   } catch (e) {
+    if (!e.status) console.error(e);
     return res.status(e.status || 500).json({ error: e.status ? e.message : 'Er ging iets mis bij de Sint' });
   }
 }
