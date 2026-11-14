@@ -12,6 +12,14 @@ export function draw(ids) {
   }
 }
 
+// Draws once everyone is done. Returns true only when it drew just now.
+export function drawIfReady(state) {
+  if (state.assignments || state.participants.length < 2 || !state.participants.every((p) => p.done)) return false;
+  state.assignments = draw(state.participants.map((p) => p.id));
+  state.drawnAt = new Date().toISOString();
+  return true;
+}
+
 export function safeEqual(a, b) {
   const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || ''));
   return x.length === y.length && timingSafeEqual(x, y);
@@ -22,7 +30,7 @@ const cleanLink = (s) => { const v = clip(s, 500); return /^https?:\/\//i.test(v
 
 export function cleanWishes(list) {
   return (Array.isArray(list) ? list : []).slice(0, 25)
-    .map((w) => ({ title: clip(w.title, 120), link: cleanLink(w.link), note: clip(w.note, 600) }))
+    .map((w) => ({ title: clip(w?.title, 120), link: cleanLink(w?.link), note: clip(w?.note, 600) }))
     .filter((w) => w.title);
 }
 
