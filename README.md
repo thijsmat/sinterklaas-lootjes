@@ -84,6 +84,10 @@ Wil je de site aanpassen met een AI-assistent (Claude, ChatGPT, Copilot, …)? G
 
 De site laat niemand zien wie wie getrokken heeft, ook de beheerder niet. Wel staat de trekking in het privé-opslagbestand in jouw Vercel-account; wie dat bestand opent kan het lezen. Open het dus niet als je zelf ook meedoet. Wie de beheersleutel heeft, kan ieders persoonlijke link kopiëren (bedoeld om via WhatsApp te delen) en zou daarmee andermans pagina kunnen openen. Het geheim blijft dus bewaard zolang de beheerder dat niet doet.
 
+## Gemaakt door
+
+Bedacht en gebouwd door [Matthijs Goes](https://matthijsgoes.nl), samen met [Claude](https://claude.com).
+
 ## Licentie
 
 MIT. Veel plezier, en vergeet het gedicht niet!
