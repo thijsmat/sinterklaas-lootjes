@@ -1,0 +1,12 @@
+{
+  "name": "sinterklaas-lootjes",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/blob": "2.9.0"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env dev.js",
+    "test": "node api/_lib/logic.test.js"
+  }
+}

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<title>Beheer lootjes</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="kop">
+    <img class="mijter" src="/mijter.svg" alt="">
+    <h1>Beheer</h1>
+    <p class="ondertitel">Hier zie je wie klaar is. Wie wie getrokken heeft, zie je nergens, ook hier niet.</p>
+  </header>
+  <p class="melding fout" id="fout" role="alert"></p>
+
+  <section class="kaart verborgen" id="statusKaart">
+    <h2>Deelnemers</h2>
+    <p class="uitleg" id="trekStatus"></p>
+    <div style="overflow-x:auto"><table class="beheer"><thead><tr><th>Naam</th><th>Mail</th><th>Lijstje</th><th>Uitgenodigd</th><th></th></tr></thead><tbody id="rijen"></tbody></table></div>
+    <div class="knoppen">
+      <button id="nodigAllen">Stuur uitnodiging naar iedereen</button>
+      <button class="licht" id="herinner">Stuur herinnering naar wie nog niet klaar is</button>
+    </div>
+    <p class="melding" id="mailMelding" aria-live="polite"></p>
+    <p class="uitleg" id="mailInfo"></p>
+  </section>
+
+  <section class="kaart verborgen" id="setupKaart">
+    <h2>Deelnemers instellen</h2>
+    <p class="uitleg">Vul naam en mailadres in. Bestaande deelnemers (zelfde mailadres) houden hun link en lijstje. Na de trekking ligt dit vast.</p>
+    <div class="perkament"><div id="setupRijen"></div>
+      <button class="licht klein" id="setupPlus">+ Deelnemer</button></div>
+    <div class="knoppen"><button id="setupOpslaan">Opslaan</button><span class="melding" id="setupMelding"></span></div>
+  </section>
+</div>
+<script src="/common.js"></script>
+<script>
+const k = new URLSearchParams(location.search).get('k');
+const $ = (id) => document.getElementById(id);
+const api = (body) => fetch('/api/admin?k=' + encodeURIComponent(k), body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {})
+  .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || 'Er ging iets mis'); return d; });
+const datum = (s) => s ? new Date(s).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'nee';
+
+function setupRij(p = {}) {
+  const d = document.createElement('div'); d.className = 'wens';
+  d.innerHTML = '<input name="name" placeholder="Naam" aria-label="Naam"><input name="email" type="email" placeholder="Mailadres" aria-label="Mailadres"><button class="licht klein weg" type="button" aria-label="Verwijderen">✕</button>';
+  d.querySelector('[name=name]').value = p.name || ''; d.querySelector('[name=email]').value = p.email || '';
+  d.querySelector('.weg').onclick = () => d.remove();
+  return d;
+}
+
+function toon(s) {
+  $('statusKaart').classList.toggle('verborgen', !s.participants.length);
+  $('setupKaart').classList.toggle('verborgen', s.drawn);
+  const klaar = s.participants.filter((p) => p.done).length;
+  $('trekStatus').textContent = s.drawn ? '🎉 De lootjes zijn getrokken op ' + datum(s.drawnAt) + ' en iedereen heeft een mail gekregen.'
+    : klaar + ' van de ' + s.participants.length + ' lijstjes zijn klaar. De trekking gaat vanzelf zodra iedereen klaar is.';
+  $('rijen').innerHTML = s.participants.map((p) => '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.email) + '</td><td>' + (p.done ? '✅ klaar' : '⏳ ' + p.wishes + ' wensen') +
+    '</td><td>' + datum(p.invitedAt) + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Opnieuw' : 'Uitnodigen') + '</button></td></tr>').join('');
+  $('rijen').querySelectorAll('button').forEach((b) => { b.onclick = () => mail('invite', [b.dataset.id]); });
+  $('herinner').classList.toggle('verborgen', s.drawn);
+  $('mailInfo').textContent = s.mailConfigured ? 'Mails gaan uit vanaf: ' + s.from : '⚠️ Er is nog geen RESEND_API_KEY ingesteld, dus mailen werkt nog niet.';
+  if (!$('setupRijen').children.length) (s.participants.length ? s.participants : [{}, {}, {}]).forEach((p) => $('setupRijen').append(setupRij(p)));
+}
+
+async function mail(action, ids) {
+  $('mailMelding').className = 'melding'; $('mailMelding').textContent = 'De Sint verstuurt de post…';
+  try {
+    const d = await api({ action, ids }); toon(d);
+    const mis = d.results.filter((r) => !r.ok);
+    $('mailMelding').textContent = d.results.length ? (mis.length ? '⚠️ Niet gelukt voor: ' + mis.map((r) => r.name + ' (' + r.error + ')').join(', ') : '✔ Verstuurd naar ' + d.results.map((r) => r.name).join(', ')) : 'Niemand om te mailen.';
+    if (mis.length) $('mailMelding').className = 'melding fout';
+  } catch (e) { $('mailMelding').className = 'melding fout'; $('mailMelding').textContent = e.message; }
+}
+$('nodigAllen').onclick = () => mail('invite');
+$('herinner').onclick = () => mail('remind');
+$('setupPlus').onclick = () => $('setupRijen').append(setupRij());
+$('setupOpslaan').onclick = async () => {
+  const participants = [...$('setupRijen').children].map((d) => ({ name: d.querySelector('[name=name]').value, email: d.querySelector('[name=email]').value }));
+  try { toon(await api({ action: 'setup', participants })); $('setupMelding').textContent = 'Opgeslagen ✔'; }
+  catch (e) { $('setupMelding').textContent = e.message; }
+};
+api().then(toon).catch((e) => { $('fout').textContent = e.message; });
+</script>
+</body>
+</html>

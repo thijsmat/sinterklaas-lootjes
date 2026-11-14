@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<title>Lootjes van de Sint</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="kop">
+    <img class="mijter" src="/mijter.svg" alt="">
+    <h1 data-ev="title">Lootjes van de Sint</h1>
+    <p class="ondertitel" id="welkom">Even geduld, de Sint zoekt je op in zijn grote boek…</p>
+    <div class="infobalk">
+      <span class="pil">🗓️ <b data-ev="date"></b></span>
+      <span class="pil">🏡 <b data-ev="place"></b></span>
+      <span class="pil">💰 budget <b data-ev="budget"></b></span>
+      <span class="pil" id="aftellen"></span>
+    </div>
+  </header>
+
+  <p class="melding fout" id="fout" role="alert"></p>
+
+  <section class="kaart verborgen" id="lootKaart" aria-live="polite">
+    <h2>🎉 Je lootje!</h2>
+    <p class="uitleg" id="lootUitleg">De Sint heeft getrokken. Klik op de envelop om te zien voor wie jij een cadeau koopt.</p>
+    <div class="envelop-zone">
+      <button class="envelop" id="envelop" aria-label="Open je lootje"><span class="zegel">S</span></button>
+    </div>
+    <div class="onthuld" id="onthuld">
+      <p style="text-align:center;margin:0">Jij koopt dit jaar een cadeau voor…</p>
+      <p class="lootnaam" id="lootNaam" style="text-align:center"></p>
+      <div class="perkament">
+        <h3>Het verlanglijstje van <span class="doelNaam"></span></h3>
+        <ul class="verlanglijst" id="doelWensen"></ul>
+        <p class="notitie" id="doelNotitie"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="kaart verborgen" id="gedichtKaart">
+    <h2>✍️ Gedichtenhulp</h2>
+    <p class="uitleg">Vul een paar woorden in en de Sint rijmt een gedicht voor <span class="doelNaam"></span>. Pas het daarna gerust aan.</p>
+    <div class="perkament">
+      <label for="gEig">Hoe is <span class="doelNaam"></span>? (bijvoorbeeld: gezellig, eigenwijs, altijd te laat)</label>
+      <input id="gEig" value="gezellig">
+      <label for="gHobby">Waar houdt <span class="doelNaam"></span> van? (bijvoorbeeld: koken, voetbal, lange wandelingen)</label>
+      <input id="gHobby" value="lekker eten">
+      <label for="gHint">Een hint over het cadeau</label>
+      <input id="gHint" value="het is niet groot, maar wel heel fijn">
+      <label for="gVan">Ondertekening</label>
+      <input id="gVan" value="Sinterklaas">
+      <div class="knoppen">
+        <button id="gMaak">Rijm een gedicht</button>
+        <button class="licht" id="gKopie">Kopieer</button>
+        <span class="melding" id="gMelding"></span>
+      </div>
+      <label for="gTekst">Jouw gedicht (je kunt het hier aanpassen)</label>
+      <textarea id="gTekst" class="gedicht" rows="13"></textarea>
+    </div>
+  </section>
+
+  <section class="kaart verborgen" id="lijstKaart">
+    <h2>📜 Mijn verlanglijstje</h2>
+    <p class="uitleg">Alleen degene die jou trekt ziet dit lijstje. Zet er gerust een link en een notitie bij (maat, kleur, winkel). Je kunt het ook na de trekking nog aanpassen.</p>
+    <div class="perkament">
+      <div id="wensen"></div>
+      <button class="licht klein" id="nieuweWens">+ Nog een wens</button>
+      <label for="notitie">Algemene notitie (optioneel)</label>
+      <textarea id="notitie" placeholder="Bijvoorbeeld: ik hou van alles met chocola, maar niet van puur."></textarea>
+    </div>
+    <div class="knoppen">
+      <button id="opslaan">Opslaan</button>
+      <button id="klaar">Mijn lijstje is klaar ✔</button>
+      <span class="melding" id="melding" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="kaart verborgen" id="statusKaart">
+    <h2>👀 Wie is er al klaar?</h2>
+    <p class="uitleg" id="statusUitleg">Zodra iedereen klaar is, trekt de Sint automatisch de lootjes en krijgt iedereen een mail.</p>
+    <ul class="mensen" id="mensen"></ul>
+  </section>
+
+  <footer>Met liefde gemaakt in de werkplaats van de Sint · deze pagina is alleen voor jou</footer>
+</div>
+<script src="/common.js"></script>
+<script src="/gedichten.js"></script>
+<script src="/lootje.js"></script>
+</body>
+</html>
