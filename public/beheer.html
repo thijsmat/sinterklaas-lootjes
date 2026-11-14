@@ -75,6 +75,7 @@ function toon(s) {
     setTimeout(() => { b.textContent = 'WhatsApp-tekst'; }, 2500);
   }; });
   $('herinner').classList.toggle('verborgen', s.drawn);
+  $('nodigAllen').textContent = s.drawn ? 'Stuur de lootjesmail opnieuw naar iedereen' : 'Stuur uitnodiging naar iedereen';
   $('mailInfo').textContent = s.mailConfigured ? 'Mails gaan uit vanaf: ' + s.from : '⚠️ Er is nog geen RESEND_API_KEY ingesteld, dus mailen werkt nog niet.';
   if (!$('setupRijen').children.length) (s.participants.length ? s.participants : [{}, {}, {}]).forEach((p) => $('setupRijen').append(setupRij(p)));
 }
@@ -93,7 +94,11 @@ $('herinner').onclick = () => mail('remind');
 $('setupPlus').onclick = () => $('setupRijen').append(setupRij());
 $('setupOpslaan').onclick = async () => {
   const participants = [...$('setupRijen').children].map((d) => ({ id: d.dataset.id, name: d.querySelector('[name=name]').value, email: d.querySelector('[name=email]').value }));
-  try { toon(await api({ action: 'setup', participants })); $('setupMelding').textContent = 'Opgeslagen ✔'; }
+  try {
+    const s = await api({ action: 'setup', participants });
+    $('setupRijen').innerHTML = ''; // rebuild the rows so new participants get their id
+    toon(s); $('setupMelding').textContent = 'Opgeslagen ✔';
+  }
   catch (e) { $('setupMelding').textContent = e.message; }
 };
 api().then(toon).catch((e) => { $('fout').textContent = e.message; });
