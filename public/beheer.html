@@ -53,6 +53,7 @@ const datum = (s) => s ? new Date(s).toLocaleString('nl-NL', { day: 'numeric', m
 function setupRij(p = {}) {
   const d = document.createElement('div'); d.className = 'wens';
   d.innerHTML = '<input name="name" placeholder="Naam" aria-label="Naam"><input name="email" type="email" placeholder="Mailadres" aria-label="Mailadres"><button class="licht klein weg" type="button" aria-label="Verwijderen">✕</button>';
+  d.dataset.id = p.id || '';
   d.querySelector('[name=name]').value = p.name || ''; d.querySelector('[name=email]').value = p.email || '';
   d.querySelector('.weg').onclick = () => d.remove();
   return d;
@@ -62,10 +63,10 @@ function toon(s) {
   $('statusKaart').classList.toggle('verborgen', !s.participants.length);
   $('setupKaart').classList.toggle('verborgen', s.drawn);
   const klaar = s.participants.filter((p) => p.done).length;
-  $('trekStatus').textContent = s.drawn ? '🎉 De lootjes zijn getrokken op ' + datum(s.drawnAt) + ' en iedereen heeft een mail gekregen.'
+  $('trekStatus').textContent = s.drawn ? '🎉 De lootjes zijn getrokken op ' + datum(s.drawnAt) + '. Mist iemand de mail? Stuur hem opnieuw met de knop achter de naam.'
     : klaar + ' van de ' + s.participants.length + ' lijstjes zijn klaar. De trekking gaat vanzelf zodra iedereen klaar is.';
   $('rijen').innerHTML = s.participants.map((p) => '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.email) + '</td><td>' + (p.done ? '✅ klaar' : '⏳ ' + p.wishes + ' wensen') +
-    '</td><td>' + datum(p.invitedAt) + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Mail opnieuw' : 'Mail') + '</button> <button class="klein wa" data-wa="' + esc(p.id) + '">WhatsApp-tekst</button></td></tr>').join('');
+    '</td><td>' + datum(p.invitedAt) + (p.remindedAt ? '<br>herinnerd ' + datum(p.remindedAt) : '') + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Mail opnieuw' : 'Mail') + '</button> <button class="klein wa" data-wa="' + esc(p.id) + '">WhatsApp-tekst</button></td></tr>').join('');
   $('rijen').querySelectorAll('button[data-id]').forEach((b) => { b.onclick = () => mail('invite', [b.dataset.id]); });
   $('rijen').querySelectorAll('button[data-wa]').forEach((b) => { b.onclick = async () => {
     const p = s.participants.find((x) => x.id === b.dataset.wa);
@@ -74,6 +75,7 @@ function toon(s) {
     setTimeout(() => { b.textContent = 'WhatsApp-tekst'; }, 2500);
   }; });
   $('herinner').classList.toggle('verborgen', s.drawn);
+  $('nodigAllen').textContent = s.drawn ? 'Stuur de lootjesmail opnieuw naar iedereen' : 'Stuur uitnodiging naar iedereen';
   $('mailInfo').textContent = s.mailConfigured ? 'Mails gaan uit vanaf: ' + s.from : '⚠️ Er is nog geen RESEND_API_KEY ingesteld, dus mailen werkt nog niet.';
   if (!$('setupRijen').children.length) (s.participants.length ? s.participants : [{}, {}, {}]).forEach((p) => $('setupRijen').append(setupRij(p)));
 }
@@ -91,8 +93,12 @@ $('nodigAllen').onclick = () => mail('invite');
 $('herinner').onclick = () => mail('remind');
 $('setupPlus').onclick = () => $('setupRijen').append(setupRij());
 $('setupOpslaan').onclick = async () => {
-  const participants = [...$('setupRijen').children].map((d) => ({ name: d.querySelector('[name=name]').value, email: d.querySelector('[name=email]').value }));
-  try { toon(await api({ action: 'setup', participants })); $('setupMelding').textContent = 'Opgeslagen ✔'; }
+  const participants = [...$('setupRijen').children].map((d) => ({ id: d.dataset.id, name: d.querySelector('[name=name]').value, email: d.querySelector('[name=email]').value }));
+  try {
+    const s = await api({ action: 'setup', participants });
+    $('setupRijen').innerHTML = ''; // rebuild the rows so new participants get their id
+    toon(s); $('setupMelding').textContent = 'Opgeslagen ✔';
+  }
   catch (e) { $('setupMelding').textContent = e.message; }
 };
 api().then(toon).catch((e) => { $('fout').textContent = e.message; });

@@ -52,7 +52,7 @@ const TEMPLATES = {
 export async function sendMail(kind, p, link) {
   if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY ontbreekt');
   const t = TEMPLATES[kind](p);
-  const r = await fetch('https://api.resend.com/emails', {
+  const request = {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -61,7 +61,12 @@ export async function sendMail(kind, p, link) {
       html: layout(t.title, t.body, link, t.button),
       text: `${t.title}\n\n${t.body.replace(/<[^>]+>/g, '')}\n\n${t.button}: ${link}`,
     }),
-  });
+  };
+  let r = await fetch('https://api.resend.com/emails', request);
+  if (r.status === 429) { // Resend limits requests per second: wait and try once more
+    await new Promise((done) => setTimeout(done, 1100));
+    r = await fetch('https://api.resend.com/emails', request);
+  }
   if (!r.ok) throw new Error(`Resend ${r.status}: ${await r.text()}`);
 }
 
@@ -71,7 +76,8 @@ export async function sendMany(kind, people, base) {
   for (const p of people) {
     try { await sendMail(kind, p, `${base}/lootje?t=${p.token}`); out.push({ name: p.name, ok: true }); }
     catch (e) {
-      if (!process.env.VERCEL) console.log(`[mail ${kind}] ${p.name}: ${base}/lootje?t=${p.token}`);
+      if (process.env.VERCEL) console.error(`[mail ${kind}] ${p.name}: ${e.message}`);
+      else console.log(`[mail ${kind}] ${p.name}: ${base}/lootje?t=${p.token}`);
       out.push({ name: p.name, ok: false, error: String(e.message).slice(0, 300) });
     }
   }
