@@ -9,7 +9,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Nunito:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -31,6 +31,7 @@
     </div>
     <p class="melding" id="mailMelding" aria-live="polite"></p>
     <p class="uitleg" id="mailInfo"></p>
+    <p class="uitleg">De knop <b>WhatsApp-tekst</b> kopieert een berichtje met de persoonlijke link. Open die links zelf niet: wie een link opent, ziet na de trekking wie die persoon getrokken heeft.</p>
   </section>
 
   <section class="kaart verborgen" id="setupKaart">
@@ -64,8 +65,14 @@ function toon(s) {
   $('trekStatus').textContent = s.drawn ? '🎉 De lootjes zijn getrokken op ' + datum(s.drawnAt) + ' en iedereen heeft een mail gekregen.'
     : klaar + ' van de ' + s.participants.length + ' lijstjes zijn klaar. De trekking gaat vanzelf zodra iedereen klaar is.';
   $('rijen').innerHTML = s.participants.map((p) => '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.email) + '</td><td>' + (p.done ? '✅ klaar' : '⏳ ' + p.wishes + ' wensen') +
-    '</td><td>' + datum(p.invitedAt) + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Opnieuw' : 'Uitnodigen') + '</button></td></tr>').join('');
-  $('rijen').querySelectorAll('button').forEach((b) => { b.onclick = () => mail('invite', [b.dataset.id]); });
+    '</td><td>' + datum(p.invitedAt) + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Mail opnieuw' : 'Mail') + '</button> <button class="klein wa" data-wa="' + esc(p.id) + '">WhatsApp-tekst</button></td></tr>').join('');
+  $('rijen').querySelectorAll('button[data-id]').forEach((b) => { b.onclick = () => mail('invite', [b.dataset.id]); });
+  $('rijen').querySelectorAll('button[data-wa]').forEach((b) => { b.onclick = async () => {
+    const p = s.participants.find((x) => x.id === b.dataset.wa);
+    const tekst = 'Hoi ' + p.name + '! 🎁 We trekken dit jaar lootjes voor Sinterklaas. Vul via jouw persoonlijke link je verlanglijstje in; zodra iedereen klaar is trekt de Sint vanzelf de lootjes.\n\n' + p.link + '\n\nDeze link is alleen voor jou, dus stuur hem niet door!';
+    try { await navigator.clipboard.writeText(tekst); b.textContent = 'Gekopieerd ✔'; } catch { prompt('Kopieer deze tekst:', tekst); }
+    setTimeout(() => { b.textContent = 'WhatsApp-tekst'; }, 2500);
+  }; });
   $('herinner').classList.toggle('verborgen', s.drawn);
   $('mailInfo').textContent = s.mailConfigured ? 'Mails gaan uit vanaf: ' + s.from : '⚠️ Er is nog geen RESEND_API_KEY ingesteld, dus mailen werkt nog niet.';
   if (!$('setupRijen').children.length) (s.participants.length ? s.participants : [{}, {}, {}]).forEach((p) => $('setupRijen').append(setupRij(p)));

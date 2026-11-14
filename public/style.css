@@ -5,21 +5,20 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-html { background: var(--rood-diep); }
+html { background: #16040a; }
 body {
   min-height: 100vh; color: var(--creme);
   font: 17px/1.55 "Nunito", system-ui, sans-serif;
   background:
-    radial-gradient(1200px 600px at 50% -10%, #b3122299, transparent 70%),
-    repeating-linear-gradient(45deg, #ffffff05 0 2px, transparent 2px 14px),
-    linear-gradient(var(--rood-donker), var(--rood-diep));
-  background-attachment: fixed; overflow-x: hidden;
+    repeating-linear-gradient(45deg, #ffffff04 0 2px, transparent 2px 14px),
+    linear-gradient(#16040a, #2a0610 40%, #16040a);
+  overflow-x: hidden;
 }
 h1, h2, h3, .sierlijk { font-family: "Playfair Display", Georgia, serif; }
 a { color: var(--goud-licht); }
 .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px 80px; position: relative; z-index: 1; }
 
-/* Pepernoten-regen */
+/* Pepernoten */
 .pepernoten { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .pepernoot {
   position: absolute; top: -30px; border-radius: 50%;
@@ -27,30 +26,85 @@ a { color: var(--goud-licht); }
   box-shadow: inset -2px -3px 4px #0005; animation: val linear infinite; opacity: .85;
 }
 @keyframes val { to { transform: translateY(110vh) rotate(540deg); } }
-@media (prefers-reduced-motion: reduce) { .pepernoot { display: none; } }
+.pepernoot.strooi { position: fixed; z-index: 60; pointer-events: none; opacity: 1; animation: strooi .9s cubic-bezier(.2, .7, .4, 1) forwards; }
+@keyframes strooi { to { transform: translate(var(--dx), calc(var(--dy) + 160px)) rotate(400deg); opacity: 0; } }
 
-/* Kop */
-header.kop { text-align: center; padding: 34px 0 10px; }
-.mijter { width: 96px; height: auto; filter: drop-shadow(0 6px 18px #000a); animation: zweef 4s ease-in-out infinite; }
+/* Het toneel: nachthemel boven de stad */
+header.kop {
+  position: relative; text-align: center; margin: 0 calc(50% - 50vw); padding: 44px 16px 210px;
+  background: linear-gradient(#060b2b 0%, #141a52 38%, #4a1a55 70%, #a8324a 92%, #e0683f 100%);
+  overflow: hidden; isolation: isolate;
+}
+header.kop > :not(.hemel, .daken, .rit) { position: relative; z-index: 3; }
+.hemel { position: absolute; inset: 0; z-index: 0; }
+.ster { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; animation: twinkel ease-in-out infinite; }
+@keyframes twinkel { 50% { opacity: .15; transform: scale(.6); } }
+.maan {
+  position: absolute; right: max(6%, calc(50% - 520px)); top: 38px; width: 130px; height: 130px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fffdf0, #ffe9a8 60%, #f3cf70);
+  box-shadow: 0 0 60px 20px #ffe9a855, 0 0 160px 60px #ffd86233;
+}
+.maan::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 30% 62%, #e6c46a55 0 9%, transparent 10%), radial-gradient(circle at 62% 30%, #e6c46a44 0 7%, transparent 8%), radial-gradient(circle at 66% 68%, #e6c46a44 0 11%, transparent 12%); }
+.wolk { position: absolute; height: 34px; border-radius: 999px; background: #ffffff14; filter: blur(6px); animation: drijf linear infinite; }
+.w1 { top: 70px; width: 320px; animation-duration: 90s; } .w2 { top: 170px; width: 240px; animation-duration: 130s; animation-delay: -60s; }
+@keyframes drijf { from { transform: translateX(-340px); } to { transform: translateX(100vw); } }
+.daken { position: absolute; left: 0; right: 0; bottom: -1px; height: 170px; z-index: 2; }
+.daken svg { width: 100%; height: 100%; display: block; }
+.huizen { fill: #16040a; }
+.ramen rect { fill: #ffc94d; filter: drop-shadow(0 0 4px #ffb400); }
+.ramen .knipper { animation: lamp 7s steps(1) infinite; }
+@keyframes lamp { 0%, 70% { opacity: 1; } 71%, 100% { opacity: .12; } }
+.rook { animation: rook 5s ease-out infinite; }
+@keyframes rook { from { transform: translate(0, 0) scale(.6); opacity: .9; } to { transform: translate(14px, -46px) scale(2.4); opacity: 0; } }
+.rit { position: absolute; left: 0; bottom: 118px; z-index: 1; width: 150px; animation: rit 38s linear infinite; filter: drop-shadow(0 0 14px #ffe9a866); }
+@keyframes rit { from { transform: translateX(-180px); } to { transform: translateX(100vw); } }
+.ruiter { width: 100%; display: block; animation: draf .5s ease-in-out infinite alternate; }
+@keyframes draf { to { transform: translateY(-5px) rotate(-1.5deg); } }
+.been { transform-box: fill-box; transform-origin: 50% 0; animation: been .5s ease-in-out infinite alternate; }
+.b1, .b4 { animation-direction: alternate-reverse; }
+@keyframes been { from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+
+.mijter { width: 84px; height: auto; filter: drop-shadow(0 6px 18px #000a); animation: zweef 4s ease-in-out infinite; }
 @keyframes zweef { 50% { transform: translateY(-8px) rotate(-2deg); } }
 header.kop h1 {
-  margin: 8px 0 0; font-size: clamp(34px, 8vw, 62px); font-weight: 900; line-height: 1.05;
-  background: linear-gradient(180deg, #fff1b8, var(--goud) 55%, #b5821c);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 2px 0 #0000; filter: drop-shadow(0 3px 0 #4a0a0f);
+  margin: 4px 0 0; font: 400 clamp(44px, 10vw, 92px)/1.05 "Berkshire Swash", "Playfair Display", serif;
+  background: linear-gradient(100deg, #b5821c 0%, #ffe48a 22%, #fff7d1 32%, #e8b931 45%, #b5821c 60%, #ffe48a 80%, #e8b931 100%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 0 #3a060b) drop-shadow(0 0 26px #ffd86255); animation: glans 6s linear infinite;
 }
-.ondertitel { color: var(--tekst-zacht); font-size: 18px; margin: 6px 0 0; }
+@keyframes glans { to { background-position: -220% 0; } }
+.ondertitel { color: #fff3d6; font-size: 19px; margin: 8px 0 0; text-shadow: 0 2px 8px #000a; }
 
 .infobalk { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 22px 0 8px; }
-.pil { background: #0004; border: 1px solid #e8b93166; border-radius: 999px; padding: 6px 16px; font-weight: 700; }
+.pil { background: #0a0d2c99; border: 1px solid #e8b93188; border-radius: 999px; padding: 6px 16px; font-weight: 700; backdrop-filter: blur(4px); }
 .pil b { color: var(--goud-licht); }
+
+.klok { display: flex; gap: 10px; justify-content: center; margin-top: 18px; min-height: 86px; }
+.tegel { width: 76px; padding: 10px 0 8px; border-radius: 14px; background: linear-gradient(#3a060b, #8b0e1a 49%, #2a0408 51%, #6d0a14);
+  border: 2px solid var(--goud); box-shadow: 0 8px 20px #0009, inset 0 1px 0 #ffffff33; }
+.tegel b { display: block; font: 900 34px/1 "Playfair Display", serif; color: var(--goud-licht); font-variant-numeric: tabular-nums; text-shadow: 0 2px 0 #000; }
+.tegel small { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #f3c9c9; }
+.klok .feest { font: 900 30px "Playfair Display", serif; color: var(--goud-licht); }
+@media (max-width: 420px) { .tegel { width: 64px; } .tegel b { font-size: 28px; } .maan { width: 84px; height: 84px; top: 20px; opacity: .9; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; }
+  .pepernoten, .rit { display: none; }
+}
 
 /* Kaarten */
 .kaart {
-  background: linear-gradient(160deg, #a3121f, var(--rood) 60%, #6d0a14);
-  border: 2px solid var(--goud); border-radius: 22px; padding: 24px; margin: 22px 0;
-  box-shadow: 0 18px 40px #0008, inset 0 0 0 6px #ffffff0a; position: relative;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #c21a2a55, transparent 60%),
+    repeating-linear-gradient(135deg, #ffffff06 0 6px, transparent 6px 12px),
+    linear-gradient(160deg, #a3121f, var(--rood) 60%, #5e0911);
+  border: 2px solid var(--goud); border-radius: 22px; padding: 28px 26px; margin: 26px 0;
+  box-shadow: 0 22px 50px #000a, inset 0 0 0 5px #5e0911, inset 0 0 0 6px #e8b93166; position: relative;
+  animation: opkomst .7s cubic-bezier(.2, .9, .3, 1) both;
 }
+@keyframes opkomst { from { opacity: 0; transform: translateY(26px); } }
+.kaart:first-of-type { margin-top: 30px; }
 .kaart::before, .kaart::after { content: "✦"; position: absolute; top: 10px; color: var(--goud); opacity: .7; }
 .kaart::before { left: 14px; } .kaart::after { right: 14px; }
 .kaart h2 { margin: 0 0 6px; color: var(--goud-licht); font-size: 28px; }
@@ -102,7 +156,7 @@ button.klein { padding: 6px 12px; font-size: 14px; }
 /* Onthulling */
 .envelop-zone { text-align: center; padding: 10px 0; }
 .envelop {
-  width: min(320px, 90%); aspect-ratio: 3 / 2; margin: 10px auto; position: relative; cursor: pointer;
+  width: min(380px, 92%); aspect-ratio: 3 / 2; margin: 14px auto; animation: lokken 2.4s ease-in-out infinite; position: relative; cursor: pointer;
   background: linear-gradient(160deg, #fbf1d6, #e6cf96); border-radius: 10px; box-shadow: 0 16px 30px #000a;
   border: 0; padding: 0; display: block;
 }
@@ -111,13 +165,23 @@ button.klein { padding: 6px 12px; font-size: 14px; }
   background: radial-gradient(circle at 35% 30%, #e0303f, #8b0e1a 70%); color: var(--goud-licht); display: grid; place-items: center;
   font: 900 30px "Playfair Display", serif; box-shadow: 0 3px 8px #0007; transition: opacity .3s; }
 .envelop:hover { animation: wiebel .5s; }
+@keyframes lokken { 50% { transform: translateY(-8px) rotate(-1.5deg); box-shadow: 0 30px 40px #000a, 0 0 50px #ffd86255; } }
+.envelop.open { animation: none; }
 @keyframes wiebel { 25% { rotate: -3deg; } 75% { rotate: 3deg; } }
 .envelop.open::before { transform: rotateX(180deg); }
 .envelop.open .zegel { opacity: 0; }
 .onthuld { display: none; }
 .onthuld.zichtbaar { display: block; animation: verschijn .9s cubic-bezier(.2, 1.4, .4, 1); }
 @keyframes verschijn { from { opacity: 0; transform: scale(.6) translateY(30px); } }
-.lootnaam { font: 900 clamp(44px, 12vw, 84px)/1 "Playfair Display", serif; color: var(--goud-licht); text-shadow: 0 4px 0 #4a0a0f, 0 0 40px #ffd86288; margin: 6px 0 14px; }
+.lootnaam { position: relative; font: 400 clamp(56px, 15vw, 120px)/1.1 "Berkshire Swash", "Playfair Display", serif; color: var(--goud-licht);
+  text-shadow: 0 4px 0 #4a0a0f, 0 0 40px #ffd86288; margin: 10px 0 22px; isolation: isolate; }
+.lootnaam::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(520px, 120%); aspect-ratio: 1; translate: -50% -50%; z-index: -1; border-radius: 50%;
+  background: repeating-conic-gradient(#ffd86233 0 9deg, transparent 9deg 18deg); -webkit-mask: radial-gradient(circle, #000 10%, transparent 68%); mask: radial-gradient(circle, #000 10%, transparent 68%);
+  animation: stralen 24s linear infinite; }
+@keyframes stralen { to { rotate: 360deg; } }
+.lootnaam span { display: inline-block; white-space: pre; animation: letter .7s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes letter { from { opacity: 0; transform: translateY(-60px) rotate(-18deg) scale(.4); } }
+.onthuld { overflow: hidden; }
 
 .verlanglijst { list-style: none; padding: 0; margin: 0; }
 .verlanglijst li { padding: 10px 0; border-bottom: 1px dashed #c59b5a; }

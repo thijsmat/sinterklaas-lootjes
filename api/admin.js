@@ -2,12 +2,12 @@ import { load, update } from './_lib/store.js';
 import { newToken, readJson, siteUrl, safeEqual } from './_lib/logic.js';
 import { sendMany } from './_lib/mail.js';
 
-// The admin sees who is done, never wishes, links or who drew whom.
-const status = (state) => ({
+// The admin sees who is done and each personal link (to share by hand), never wishes or who drew whom.
+const status = (state, base) => ({
   drawn: !!state.assignments, drawnAt: state.drawnAt,
   participants: state.participants.map((p) => ({
     id: p.id, name: p.name, email: p.email, done: !!p.done, wishes: (p.wishes || []).length,
-    invitedAt: p.invitedAt || null, remindedAt: p.remindedAt || null,
+    invitedAt: p.invitedAt || null, remindedAt: p.remindedAt || null, link: `${base}/lootje?t=${p.token}`,
   })),
   mailConfigured: !!process.env.RESEND_API_KEY, from: process.env.MAIL_FROM || 'Sinterklaas <onboarding@resend.dev>',
 });
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!process.env.ADMIN_KEY || !safeEqual(req.query.k, process.env.ADMIN_KEY)) return res.status(403).json({ error: 'Geen toegang' });
   try {
-    if (req.method === 'GET') return res.json(status((await load()).state));
+    if (req.method === 'GET') return res.json(status((await load()).state, siteUrl(req)));
     if (req.method !== 'POST') return res.status(405).end();
     const body = await readJson(req);
 
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
           const old = byEmail.get(r.email);
           return old ? { ...old, name: r.name } : { id: newToken().slice(0, 8), token: newToken(), wishes: [], note: '', done: false, ...r };
         });
-        return status(state);
+        return status(state, siteUrl(req));
       });
       return res.json(out);
     }
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
         targets.forEach((p) => { p[kind === 'invite' ? 'invitedAt' : 'remindedAt'] = now; });
       });
       const results = await sendMany(kind, targets, siteUrl(req));
-      return res.json({ results, ...status((await load()).state) });
+      return res.json({ results, ...status((await load()).state, siteUrl(req)) });
     }
     return res.status(400).json({ error: 'Onbekende actie' });
   } catch (e) {

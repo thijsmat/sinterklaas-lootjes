@@ -5,7 +5,7 @@ Een kleine, privé lootjessite voor Sinterklaas in volle Sinterklaasstijl, voor 
 - **Persoonlijke links**: geen accounts of wachtwoorden; iedereen krijgt een geheime link per mail.
 - **Verlanglijstjes** met per wens een link en een notitie, plus een algemene notitie.
 - **Automatische trekking** zodra iedereen zijn lijstje klaar heeft. Niemand trekt zichzelf.
-- **Echt geheim**: alleen jij ziet wie jij hebt. De beheerpagina toont alleen wie er klaar is, nooit wie wie heeft of wat iemand wenst.
+- **Echt geheim**: alleen jij ziet wie jij hebt. De beheerpagina toont alleen wie er klaar is, nooit wie wie heeft of wat iemand wenst. (De beheerder kan wel ieders persoonlijke link kopiëren om via WhatsApp te delen, en moet die links dus zelf niet openen.)
 - **Alleen jouw Sint ziet jouw lijstje**: je verlanglijstje is alleen zichtbaar voor degene die jou getrokken heeft.
 - **Mails** via [Resend](https://resend.com): uitnodiging, herinnering, en "je lootje is getrokken".
 - **Gedichtenhulp**: vul een paar woorden in en de Sint rijmt een gedicht.
@@ -46,7 +46,7 @@ Wil je de site aanpassen met een AI-assistent (Claude, ChatGPT, Copilot, …)? G
 
 ## Privacy, eerlijk gezegd
 
-De site laat niemand zien wie wie getrokken heeft, ook de beheerder niet. Wel staat de trekking in het privé-opslagbestand in jouw Vercel-account; wie dat bestand opent kan het lezen. Open het dus niet als je zelf ook meedoet. Wie de beheersleutel heeft, kan in theorie een mailadres veranderen voor de trekking en zo andermans link ontvangen; na de trekking liggen de deelnemers vast.
+De site laat niemand zien wie wie getrokken heeft, ook de beheerder niet. Wel staat de trekking in het privé-opslagbestand in jouw Vercel-account; wie dat bestand opent kan het lezen. Open het dus niet als je zelf ook meedoet. Wie de beheersleutel heeft, kan ieders persoonlijke link kopiëren (bedoeld om via WhatsApp te delen) en zou daarmee andermans pagina kunnen openen. Het geheim blijft dus bewaard zolang de beheerder dat niet doet.
 
 ## Licentie
 

@@ -49,7 +49,8 @@ function toon(d, eersteKeer) {
   if (d.drawn) {
     $('lootKaart').classList.remove('verborgen'); $('gedichtKaart').classList.remove('verborgen');
     document.querySelectorAll('.doelNaam').forEach((e) => { e.textContent = d.target.name; });
-    $('lootNaam').textContent = d.target.name;
+    $('lootNaam').innerHTML = [...d.target.name].map((c, i) => `<span style="animation-delay:${0.25 + i * 0.09}s">${esc(c)}</span>`).join('');
+    $('lootNaam').setAttribute('aria-label', d.target.name);
     $('doelWensen').innerHTML = lijstHtml(d.target.wishes);
     $('doelNotitie').textContent = d.target.note;
     if (eersteKeer && localStorageGet('geopend-' + token)) openEnvelop(false);
