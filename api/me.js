@@ -6,8 +6,8 @@ const find = (state, t) => state.participants.find((p) => t && safeEqual(p.token
 
 export function view(state, me) {
   const out = {
-    me: { name: me.name, wishes: me.wishes || [], note: me.note || '', done: !!me.done },
-    people: state.participants.map((p) => ({ name: p.name, done: !!p.done, me: p.id === me.id })),
+    me: { name: me.name, wishes: me.wishes || [], note: me.note || '', done: !!me.done, lastYear: me.lastYear || '' },
+    people: state.participants.map((p) => ({ id: p.id, name: p.name, done: !!p.done, me: p.id === me.id })),
     drawn: !!state.assignments, event: EVENT,
   };
   if (state.assignments) {
@@ -36,6 +36,9 @@ export default async function handler(req, res) {
       if (!me) throw Object.assign(new Error('Onbekende link'), { status: 404 }); // throwing skips the write
       me.wishes = cleanWishes(body.wishes);
       me.note = cleanNote(body.note);
+      // Who they had last year: optional, only another participant, and fixed once the draw is done.
+      if (!state.assignments && typeof body.lastYear === 'string')
+        me.lastYear = state.participants.some((p) => p.id === body.lastYear && p.id !== me.id) ? body.lastYear : '';
       if (body.done === true) {
         if (!me.wishes.length) throw Object.assign(new Error('Voeg minstens één wens toe'), { status: 400 });
         me.done = true;

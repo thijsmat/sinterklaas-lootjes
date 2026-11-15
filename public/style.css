@@ -199,3 +199,5 @@ table.beheer { width: 100%; border-collapse: collapse; }
 table.beheer th, table.beheer td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #ffffff22; }
 .verborgen { display: none !important; }
 footer { text-align: center; color: #c98a8a; font-size: 13px; margin-top: 40px; }
+
+.hulp { margin: 4px 0 0; font-size: 14px; color: #6b4a2a; }

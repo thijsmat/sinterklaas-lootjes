@@ -17,7 +17,7 @@ Dit is een kleine Sinterklaas-lootjessite. Houd het klein: geen framework, geen 
 
 1. **Geheimhouding**: `api/admin.js` mag nooit wensen of `assignments` teruggeven. Het geeft wel ieders persoonlijke link terug, zodat de beheerder die via WhatsApp kan delen. Alleen `api/me.js` geeft één deelnemer zijn eigen getrokken persoon terug.
 2. **Lijstjes**: een deelnemer ziet alleen zijn eigen lijstje en dat van de persoon die hij getrokken heeft.
-3. **Trekking**: niemand trekt zichzelf en iedereen wordt precies één keer getrokken. Pas `api/_lib/logic.test.js` aan als je regels toevoegt (bijvoorbeeld partners uitsluiten) en draai `npm test`.
+3. **Trekking**: niemand trekt zichzelf en iedereen wordt precies één keer getrokken. "Wie had je vorig jaar" (`lastYear`) is een voorkeur, geen harde regel: de trekking mag er nooit op vastlopen, en de beheerder krijgt het veld niet te zien. Pas `api/_lib/logic.test.js` aan als je regels toevoegt (bijvoorbeeld partners uitsluiten) en draai `npm test`.
 4. **Geen persoonlijke gegevens in de code**: namen en mailadressen gaan via de beheerpagina in de opslag; feestgegevens via environment variables.
 5. **Escapen**: alle gebruikersinvoer wordt in de browser via `esc()` of `textContent` getoond, nooit rauw via `innerHTML`.
 
