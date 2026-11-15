@@ -9,6 +9,7 @@ Een kleine, privé lootjessite voor Sinterklaas in volle Sinterklaasstijl, voor 
 - **Persoonlijke links**: geen accounts of wachtwoorden; iedereen krijgt een geheime link per mail.
 - **Verlanglijstjes** met per wens een link en een notitie, plus een algemene notitie.
 - **Automatische trekking** zodra iedereen zijn lijstje klaar heeft. Niemand trekt zichzelf.
+- **Niet weer dezelfde**: iedereen kan (optioneel) aangeven wie hij vorig jaar had; de Sint vermijdt die persoon waar het kan.
 - **Echt geheim**: alleen jij ziet wie jij hebt. De beheerpagina toont alleen wie er klaar is, nooit wie wie heeft of wat iemand wenst. (De beheerder kan wel ieders persoonlijke link kopiëren om via WhatsApp te delen, en moet die links dus zelf niet openen.)
 - **Alleen jouw Sint ziet jouw lijstje**: je verlanglijstje is alleen zichtbaar voor degene die jou getrokken heeft.
 - **Mails** via [Resend](https://resend.com): uitnodiging, herinnering, en "je lootje is getrokken".

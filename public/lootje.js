@@ -39,8 +39,11 @@ function toon(d, eersteKeer) {
     $('wensen').innerHTML = '';
     (d.me.wishes.length ? d.me.wishes : [{}]).forEach((w) => $('wensen').append(wensRij(w)));
     $('notitie').value = d.me.note;
+    d.people.filter((p) => !p.me).forEach((p) => $('vorigJaar').add(new Option(p.name, p.id)));
+    $('vorigJaar').value = d.me.lastYear;
   }
   $('klaar').classList.toggle('verborgen', d.me.done);
+  $('vorigBlok').classList.toggle('verborgen', d.drawn);
   $('mensen').innerHTML = d.people.map((p) => `<li class="${p.done ? 'klaar' : ''} ${p.me ? 'ik' : ''}">${p.done ? '✅' : '⏳'} ${esc(p.name)}</li>`).join('');
   const nogTe = d.people.filter((p) => !p.done).length;
   $('statusUitleg').textContent = d.drawn ? 'Iedereen was klaar en de lootjes zijn getrokken!'
@@ -80,7 +83,7 @@ async function bewaar(done) {
     const wishes = leesWensen();
     if (done && !wishes.length) throw new Error('Voeg minstens één wens toe');
     const d = await api({ method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wishes, note: $('notitie').value, ...(done ? { done: true } : {}) }) });
+      body: JSON.stringify({ wishes, note: $('notitie').value, lastYear: $('vorigJaar').value, ...(done ? { done: true } : {}) }) });
     toon(d, false);
     $('melding').textContent = d.drawn && done ? '🎉 Jij was de laatste! De lootjes zijn getrokken.' : done ? 'Top! Je lijstje staat in het grote boek. ✔' : 'Opgeslagen ✔';
     if (d.drawn && done) $('lootKaart').scrollIntoView({ behavior: 'smooth' });
