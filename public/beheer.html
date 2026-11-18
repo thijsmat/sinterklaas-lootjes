@@ -19,12 +19,13 @@
     <h1>Beheer</h1>
     <p class="ondertitel">Hier zie je wie klaar is. Wie wie getrokken heeft, zie je nergens, ook hier niet.</p>
   </header>
+  <main>
   <p class="melding fout" id="fout" role="alert"></p>
 
   <section class="kaart verborgen" id="statusKaart">
-    <h2>Deelnemers</h2>
+    <h2 id="deelnemersKop">Deelnemers</h2>
     <p class="uitleg" id="trekStatus"></p>
-    <div style="overflow-x:auto"><table class="beheer"><thead><tr><th>Naam</th><th>Mail</th><th>Lijstje</th><th>Uitgenodigd</th><th></th></tr></thead><tbody id="rijen"></tbody></table></div>
+    <div style="overflow-x:auto"><table class="beheer" aria-labelledby="deelnemersKop"><thead><tr><th scope="col">Naam</th><th scope="col">Mail</th><th scope="col">Lijstje</th><th scope="col">Uitgenodigd</th><th scope="col"><span class="visually-hidden">Acties</span></th></tr></thead><tbody id="rijen"></tbody></table></div>
     <div class="knoppen">
       <button id="nodigAllen">Stuur uitnodiging naar iedereen</button>
       <button class="licht" id="herinner">Stuur herinnering naar wie nog niet klaar is</button>
@@ -37,10 +38,13 @@
   <section class="kaart verborgen" id="setupKaart">
     <h2>Deelnemers instellen</h2>
     <p class="uitleg">Vul naam en mailadres in. Bestaande deelnemers (zelfde mailadres) houden hun link en lijstje. Na de trekking ligt dit vast.</p>
-    <div class="perkament"><div id="setupRijen"></div>
-      <button class="licht klein" id="setupPlus">+ Deelnemer</button></div>
-    <div class="knoppen"><button id="setupOpslaan">Opslaan</button><span class="melding" id="setupMelding" role="status"></span></div>
+    <form id="setupForm">
+      <div class="perkament"><div id="setupRijen"></div>
+        <button type="button" class="licht klein" id="setupPlus">+ Deelnemer</button></div>
+      <div class="knoppen"><button id="setupOpslaan">Opslaan</button><span class="melding" id="setupMelding" role="status"></span></div>
+    </form>
   </section>
+  </main>
 </div>
 <script src="/common.js"></script>
 <script>
@@ -52,9 +56,18 @@ const datum = (s) => s ? new Date(s).toLocaleString('nl-NL', { day: 'numeric', m
 
 function setupRij(p = {}) {
   const d = document.createElement('div'); d.className = 'wens';
-  d.innerHTML = '<input name="name" placeholder="Naam" aria-label="Naam"><input name="email" type="email" placeholder="Mailadres" aria-label="Mailadres"><button class="licht klein weg" type="button" aria-label="Verwijderen">✕</button>';
+  d.innerHTML = '<input name="name" placeholder="Naam" aria-label="Naam" autocomplete="off" maxlength="40" aria-invalid="false">' +
+    '<input name="email" type="email" placeholder="Mailadres" aria-label="Mailadres" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-invalid="false">' +
+    '<button class="licht klein weg" type="button">✕</button>';
   d.dataset.id = p.id || '';
   d.querySelector('[name=name]').value = p.name || ''; d.querySelector('[name=email]').value = p.email || '';
+  // Een lege rij telt niet mee; zodra er iets in staat, zijn naam en mailadres allebei verplicht.
+  const verplicht = () => {
+    const velden = [...d.querySelectorAll('input')], naam = velden[0].value.trim();
+    velden.forEach((i) => { i.required = velden.some((v) => v.value.trim()); });
+    d.querySelector('.weg').setAttribute('aria-label', naam ? naam + ' verwijderen' : 'Lege rij verwijderen');
+  };
+  d.addEventListener('input', verplicht); verplicht();
   d.querySelector('.weg').onclick = async () => {
     if (d.dataset.id) {
       const naam = d.querySelector('[name=name]').value.trim() || 'deze deelnemer';
@@ -80,7 +93,7 @@ function toon(s) {
   $('trekStatus').textContent = s.drawn ? '🎉 De lootjes zijn getrokken op ' + datum(s.drawnAt) + '. Mist iemand de mail? Stuur hem opnieuw met de knop achter de naam.'
     : klaar + ' van de ' + s.participants.length + ' lijstjes zijn klaar. De trekking gaat vanzelf zodra iedereen klaar is.';
   $('rijen').innerHTML = s.participants.map((p) => '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.email) + '</td><td>' + (p.done ? '✅ klaar' : '⏳ ' + p.wishes + ' wensen') +
-    '</td><td>' + datum(p.invitedAt) + (p.remindedAt ? '<br>herinnerd ' + datum(p.remindedAt) : '') + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Mail opnieuw' : 'Mail') + '</button> <button class="klein wa" data-wa="' + esc(p.id) + '">WhatsApp-tekst</button><span class="tip" role="status"></span></td></tr>').join('');
+    '</td><td>' + datum(p.invitedAt) + (p.remindedAt ? '<br>herinnerd ' + datum(p.remindedAt) : '') + '</td><td><button class="licht klein" data-id="' + esc(p.id) + '">' + (p.invitedAt ? 'Mail opnieuw' : 'Mail') + '<span class="visually-hidden"> naar ' + esc(p.name) + '</span></button> <button class="klein wa" data-wa="' + esc(p.id) + '">WhatsApp-tekst<span class="visually-hidden"> voor ' + esc(p.name) + '</span></button><span class="tip" role="status"></span></td></tr>').join('');
   $('rijen').querySelectorAll('button[data-id]').forEach((b) => { b.onclick = () => mail('invite', [b.dataset.id], b); });
   $('rijen').querySelectorAll('button[data-wa]').forEach((b) => { b.onclick = async () => {
     const p = s.participants.find((x) => x.id === b.dataset.wa);
@@ -125,8 +138,21 @@ $('herinner').onclick = async () => {
   if (!wie.length || await vraag({ titel: 'Herinnering sturen?', ja: 'Ja, verstuur',
     tekst: 'De Sint stuurt een herinnering naar wie nog niet klaar is: ' + wie.join(', ') + '.' })) mail('remind', undefined, $('herinner'));
 };
-$('setupPlus').onclick = () => $('setupRijen').append(setupRij());
-$('setupOpslaan').onclick = async () => {
+$('setupPlus').onclick = () => { const r = setupRij(); $('setupRijen').append(r); r.querySelector('input').focus(); };
+// aria-invalid volgt de rode rand (:user-invalid), zodat een schermlezer pas na het invullen "ongeldig" zegt
+const volgFout = (e) => { if (e.target.matches?.('#setupForm input')) e.target.setAttribute('aria-invalid', e.target.matches(':user-invalid')); };
+// Foutmeldingen in het Nederlands, ook als de browser Engels is; weg zodra je het veld aanpast
+document.addEventListener('invalid', (e) => {
+  const v = e.target.validity;
+  e.target.setCustomValidity(v.valueMissing ? (e.target.name === 'email' ? 'Vul een mailadres in.' : 'Vul een naam in.')
+    : v.typeMismatch ? 'Dit mailadres klopt niet. Staan de @ en de punt erin?' : '');
+}, true);
+document.addEventListener('input', (e) => { if (e.target.matches?.('#setupForm input')) e.target.setCustomValidity(''); }, true);
+['blur', 'input', 'invalid'].forEach((t) => document.addEventListener(t, volgFout, true));
+$('setupForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const knop = $('setupOpslaan');
+  knop.disabled = true;
   const participants = [...$('setupRijen').children].map((d) => ({ id: d.dataset.id, name: d.querySelector('[name=name]').value, email: d.querySelector('[name=email]').value }));
   try {
     const s = await api({ action: 'setup', participants });
@@ -134,6 +160,7 @@ $('setupOpslaan').onclick = async () => {
     toon(s); $('setupMelding').className = 'melding'; $('setupMelding').textContent = 'Opgeslagen ✔';
   }
   catch (e) { $('setupMelding').className = 'melding fout'; $('setupMelding').textContent = e.message; }
+  finally { knop.disabled = false; if (document.activeElement === document.body) knop.focus(); }
 };
 api().then(toon).catch((e) => { $('fout').textContent = e.message; });
 </script>
