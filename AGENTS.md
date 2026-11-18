@@ -4,7 +4,7 @@ Dit is een kleine Sinterklaas-lootjessite. Houd het klein: geen framework, geen 
 
 ## Opbouw
 
-- `public/` statische pagina's (Nederlands): `index.html` (welkom), `lootje.html` + `lootje.js` (persoonlijke pagina via `?t=<token>`), `beheer.html` (beheer via `?k=<ADMIN_KEY>`), `common.js` (pepernoten, aftelklok, confetti), `gedichten.js` (rijmsjablonen), `style.css`.
+- `public/` statische pagina's (Nederlands): `index.html` (welkom), `lootje.html` + `lootje.js` (persoonlijke pagina via `?t=<token>`), `beheer.html` (beheer via `?k=<ADMIN_KEY>`), `common.js` (pepernoten, aftelklok, confetti, `vraag()` voor bevestigingen in een `<dialog>`), `gedichten.js` (rijmsjablonen), `style.css`.
 - `api/me.js` GET/POST voor één deelnemer: eigen lijstje lezen/opslaan, "klaar" melden, en de automatische trekking als iedereen klaar is.
 - `api/admin.js` beheer: deelnemers instellen, uitnodigingen en herinneringen sturen. Haal je de laatste niet-klare deelnemer weg, dan start ook hier de trekking (`drawIfReady` in `logic.js`).
 - `api/event.js` levert de feestgegevens uit de environment variables.

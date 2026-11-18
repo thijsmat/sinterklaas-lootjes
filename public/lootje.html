@@ -28,7 +28,7 @@
 
   <p class="melding fout" id="fout" role="alert"></p>
 
-  <section class="kaart verborgen" id="lootKaart" aria-live="polite">
+  <section class="kaart verborgen" id="lootKaart">
     <h2>🎉 Je lootje!</h2>
     <p class="uitleg" id="lootUitleg">De Sint heeft getrokken. Klik op de envelop om te zien voor wie jij een cadeau koopt.</p>
     <div class="envelop-zone">
@@ -36,7 +36,7 @@
     </div>
     <div class="onthuld" id="onthuld">
       <p style="text-align:center;margin:0">Jij koopt dit jaar een cadeau voor…</p>
-      <p class="lootnaam" id="lootNaam" style="text-align:center"></p>
+      <p class="lootnaam" id="lootNaam" tabindex="-1" style="text-align:center"></p>
       <div class="perkament">
         <h3>Het verlanglijstje van <span class="doelNaam"></span></h3>
         <ul class="verlanglijst" id="doelWensen"></ul>
@@ -60,7 +60,7 @@
       <div class="knoppen">
         <button id="gMaak">Rijm een gedicht</button>
         <button class="licht" id="gKopie">Kopieer</button>
-        <span class="melding" id="gMelding"></span>
+        <span class="melding" id="gMelding" role="status"></span>
       </div>
       <label for="gTekst">Jouw gedicht (je kunt het hier aanpassen)</label>
       <textarea id="gTekst" class="gedicht" rows="13"></textarea>
@@ -84,6 +84,7 @@
     <div class="knoppen">
       <button id="opslaan">Opslaan</button>
       <button id="klaar">Mijn lijstje is klaar ✔</button>
+      <button class="licht verborgen" id="nietKlaar">Toch nog niet klaar</button>
       <span class="melding" id="melding" aria-live="polite"></span>
     </div>
   </section>

@@ -16,7 +16,12 @@ function wensRij(w = {}) {
   d.querySelector('[name=title]').value = w.title || '';
   d.querySelector('[name=link]').value = w.link || '';
   d.querySelector('[name=note]').value = w.note || '';
-  d.querySelector('.weg').onclick = () => { d.remove(); if (!$('wensen').children.length) $('wensen').append(wensRij()); };
+  d.querySelector('.weg').onclick = () => {
+    const buur = d.previousElementSibling || d.nextElementSibling;
+    d.remove();
+    if (!buur) $('wensen').append(wensRij());
+    (buur || $('wensen').firstElementChild).querySelector('input').focus(); // anders valt de focus terug naar het begin van de pagina
+  };
   return d;
 }
 
@@ -43,6 +48,7 @@ function toon(d, eersteKeer) {
     $('vorigJaar').value = d.me.lastYear;
   }
   $('klaar').classList.toggle('verborgen', d.me.done);
+  $('nietKlaar').classList.toggle('verborgen', !d.me.done || d.drawn);
   $('vorigBlok').classList.toggle('verborgen', d.drawn);
   $('mensen').innerHTML = d.people.map((p) => `<li class="${p.done ? 'klaar' : ''} ${p.me ? 'ik' : ''}">${p.done ? '✅' : '⏳'} ${esc(p.name)}</li>`).join('');
   const nogTe = d.people.filter((p) => !p.done).length;
@@ -52,8 +58,9 @@ function toon(d, eersteKeer) {
   if (d.drawn) {
     $('lootKaart').classList.remove('verborgen'); $('gedichtKaart').classList.remove('verborgen');
     document.querySelectorAll('.doelNaam').forEach((e) => { e.textContent = d.target.name; });
-    $('lootNaam').innerHTML = [...d.target.name].map((c, i) => `<span style="animation-delay:${0.25 + i * 0.09}s">${esc(c)}</span>`).join('');
-    $('lootNaam').setAttribute('aria-label', d.target.name);
+    // Losse lettertjes voor de animatie; schermlezers lezen de hele naam in één keer.
+    $('lootNaam').innerHTML = `<span class="visually-hidden">${esc(d.target.name)}</span>` +
+      [...d.target.name].map((c, i) => `<span aria-hidden="true" style="animation-delay:${0.25 + i * 0.09}s">${esc(c)}</span>`).join('');
     $('doelWensen').innerHTML = lijstHtml(d.target.wishes);
     $('doelNotitie').textContent = d.target.note;
     if (eersteKeer && localStorageGet('geopend-' + token)) openEnvelop(false);
@@ -70,29 +77,41 @@ function openEnvelop(feest = true) {
     $('envelop').parentElement.classList.add('verborgen');
     $('lootUitleg').textContent = 'Sssst… niet verder vertellen!';
     $('onthuld').classList.add('zichtbaar');
-    if (feest) confetti();
+    if (feest) { confetti(); $('lootNaam').focus(); } // de envelopknop is weg, dus de focus gaat naar de naam
   }, feest ? 650 : 0);
   localStorageSet('geopend-' + token, '1');
 }
 $('envelop').onclick = () => openEnvelop(true);
 
+const meld = (tekst, fout) => { $('melding').className = fout ? 'melding fout' : 'melding'; $('melding').textContent = tekst; };
+
+// done: true = klaar, false = toch nog niet klaar, weggelaten = alleen opslaan
 async function bewaar(done) {
-  const knop = done ? $('klaar') : $('opslaan');
-  knop.disabled = true; $('melding').className = 'melding'; $('melding').textContent = 'De Sint schrijft het op…';
+  const knop = $(done === true ? 'klaar' : done === false ? 'nietKlaar' : 'opslaan');
+  knop.disabled = true; meld('De Sint schrijft het op…');
   try {
-    const wishes = leesWensen();
-    if (done && !wishes.length) throw new Error('Voeg minstens één wens toe');
     const d = await api({ method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wishes, note: $('notitie').value, lastYear: $('vorigJaar').value, ...(done ? { done: true } : {}) }) });
+      body: JSON.stringify({ wishes: leesWensen(), note: $('notitie').value, lastYear: $('vorigJaar').value, done }) });
     toon(d, false);
-    $('melding').textContent = d.drawn && done ? '🎉 Jij was de laatste! De lootjes zijn getrokken.' : done ? 'Top! Je lijstje staat in het grote boek. ✔' : 'Opgeslagen ✔';
-    if (d.drawn && done) $('lootKaart').scrollIntoView({ behavior: 'smooth' });
+    meld(d.drawn && done ? '🎉 Jij was de laatste! De lootjes zijn getrokken.' : done ? 'Top! Je lijstje staat in het grote boek. ✔'
+      : done === false ? 'Je lijstje staat weer op "nog niet klaar".' : 'Opgeslagen ✔');
+    if (d.drawn && done) { $('lootKaart').scrollIntoView({ behavior: 'smooth' }); $('envelop').focus({ preventScroll: true }); }
+    else if (done !== undefined) $(done ? 'nietKlaar' : 'klaar').focus(); // de knop die je indrukte is nu verborgen
   } catch (e) {
-    $('melding').className = 'melding fout'; $('melding').textContent = e.message;
+    meld(e.message, true);
   } finally { knop.disabled = false; }
 }
-$('opslaan').onclick = () => bewaar(false);
-$('klaar').onclick = () => bewaar(true);
+$('opslaan').onclick = () => bewaar();
+$('nietKlaar').onclick = () => bewaar(false);
+$('klaar').onclick = async () => {
+  if (!leesWensen().length) { meld('Voeg minstens één wens toe', true); $('wensen').querySelector('input').focus(); return; }
+  // Alleen de laatste kan niet meer terug: dan trekt de Sint meteen.
+  const laatste = data.people.length > 1 && data.people.every((p) => p.me || p.done);
+  if (laatste && !await vraag({ titel: 'Jij bent de laatste!',
+    tekst: 'Zodra jouw lijstje klaar is, trekt de Sint meteen de lootjes en krijgt iedereen een mail. Dat kan daarna niet meer terug; je wensen aanpassen kan wel.',
+    ja: 'Ja, trek de lootjes' })) return;
+  bewaar(true);
+};
 $('nieuweWens').onclick = () => { const r = wensRij(); $('wensen').append(r); r.querySelector('input').focus(); };
 
 let gNr = Math.floor(Math.random() * GEDICHTEN.length);
