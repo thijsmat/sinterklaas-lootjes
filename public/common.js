@@ -78,7 +78,7 @@
 
   // Klik op de achtergrond: een handje pepernoten
   document.addEventListener('click', (e) => {
-    if (e.target.closest('a, button, input, textarea, select, label, .kaart')) return;
+    if (e.target.closest('a, button, input, textarea, select, label, .kaart, dialog')) return;
     for (let i = 0; i < 9; i++) {
       const p = el('div', 'pepernoot strooi'), s = 9 + Math.random() * 9, a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90;
       Object.assign(p.style, { left: e.clientX + 'px', top: e.clientY + 'px', width: s + 'px', height: s + 'px' });
@@ -112,5 +112,27 @@ window.confetti = function () {
     document.body.appendChild(c); setTimeout(() => c.remove(), 5000);
   }
 };
+
+// Vraag op perkament in een native <dialog>: geeft true als er op "ja" is gedrukt. Met `veld` toont hij
+// een tekst om zelf te kopiëren (dan zonder ja-knop). De browser geeft de focus terug aan de knop die hem opende.
+window.vraag = ({ titel, tekst, ja, nee = 'Nog even niet', veld }) => new Promise((klaar) => {
+  const d = document.createElement('dialog');
+  d.className = 'vraag';
+  d.setAttribute('aria-labelledby', 'vraagTitel');
+  d.setAttribute('aria-describedby', 'vraagTekst');
+  d.innerHTML = '<h2 id="vraagTitel"></h2><p id="vraagTekst"></p>' + (veld == null ? '' : '<textarea readonly rows="7" aria-labelledby="vraagTekst"></textarea>') +
+    '<form method="dialog" class="knoppen"><button value="nee" class="licht"></button>' + (ja ? '<button value="ja"></button>' : '') + '</form>';
+  d.querySelector('h2').textContent = titel;
+  d.querySelector('p').textContent = tekst;
+  d.querySelector('[value=nee]').textContent = nee;
+  if (ja) d.querySelector('[value=ja]').textContent = ja;
+  const t = d.querySelector('textarea');
+  if (t) t.value = veld;
+  (t || d.querySelector('[value=nee]')).autofocus = true; // de veilige keuze heeft de focus
+  d.addEventListener('close', () => { klaar(d.returnValue === 'ja'); d.remove(); });
+  document.body.append(d);
+  d.showModal();
+  t?.select();
+});
 
 window.esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

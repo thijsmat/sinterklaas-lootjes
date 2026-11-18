@@ -26,9 +26,10 @@
     <div class="klok" id="aftellen" role="timer" aria-label="Aftellen tot pakjesavond"></div>
   </header>
 
+  <main>
   <p class="melding fout" id="fout" role="alert"></p>
 
-  <section class="kaart verborgen" id="lootKaart" aria-live="polite">
+  <section class="kaart verborgen" id="lootKaart">
     <h2>🎉 Je lootje!</h2>
     <p class="uitleg" id="lootUitleg">De Sint heeft getrokken. Klik op de envelop om te zien voor wie jij een cadeau koopt.</p>
     <div class="envelop-zone">
@@ -36,7 +37,7 @@
     </div>
     <div class="onthuld" id="onthuld">
       <p style="text-align:center;margin:0">Jij koopt dit jaar een cadeau voor…</p>
-      <p class="lootnaam" id="lootNaam" style="text-align:center"></p>
+      <p class="lootnaam" id="lootNaam" tabindex="-1" style="text-align:center"></p>
       <div class="perkament">
         <h3>Het verlanglijstje van <span class="doelNaam"></span></h3>
         <ul class="verlanglijst" id="doelWensen"></ul>
@@ -60,7 +61,7 @@
       <div class="knoppen">
         <button id="gMaak">Rijm een gedicht</button>
         <button class="licht" id="gKopie">Kopieer</button>
-        <span class="melding" id="gMelding"></span>
+        <span class="melding" id="gMelding" role="status"></span>
       </div>
       <label for="gTekst">Jouw gedicht (je kunt het hier aanpassen)</label>
       <textarea id="gTekst" class="gedicht" rows="13"></textarea>
@@ -69,7 +70,7 @@
 
   <section class="kaart verborgen" id="lijstKaart">
     <h2>📜 Mijn verlanglijstje</h2>
-    <p class="uitleg">Alleen degene die jou trekt ziet dit lijstje. Zet er gerust een link en een notitie bij (maat, kleur, winkel). Je kunt het ook na de trekking nog aanpassen.</p>
+    <p class="uitleg">Alleen degene die jou trekt ziet dit lijstje. Zet er gerust een link en een notitie bij (maat, kleur, winkel). Je kunt het ook na de trekking nog aanpassen. De Sint bewaart alles vanzelf terwijl je typt.</p>
     <div class="perkament">
       <div id="wensen"></div>
       <button class="licht klein" id="nieuweWens">+ Nog een wens</button>
@@ -84,6 +85,7 @@
     <div class="knoppen">
       <button id="opslaan">Opslaan</button>
       <button id="klaar">Mijn lijstje is klaar ✔</button>
+      <button class="licht verborgen" id="nietKlaar">Toch nog niet klaar</button>
       <span class="melding" id="melding" aria-live="polite"></span>
     </div>
   </section>
@@ -93,6 +95,7 @@
     <p class="uitleg" id="statusUitleg">Zodra iedereen klaar is, trekt de Sint automatisch de lootjes en krijgt iedereen een mail.</p>
     <ul class="mensen" id="mensen"></ul>
   </section>
+  </main>
 
   <footer>Met liefde gemaakt in de werkplaats van de Sint · deze pagina is alleen voor jou</footer>
 </div>
